@@ -16,13 +16,12 @@ class AutoSnoozeReceiver : BroadcastReceiver() {
                 val repo = AlarmRepository(context)
                 val alarm = repo.getById(alarmId)
                 alarm?.let { alarm ->
-                    repo.update(
-                        alarm.copy(
-                            missedCount = alarm.missedCount + 1,
-                            snoozeCount = alarm.snoozeCount + 1
-                        )
+                    val updatedAlarm = alarm.copy(
+                        missedCount = alarm.missedCount + 1,
+                        snoozeCount = alarm.snoozeCount + 1
                     )
-                    AlarmScheduler.scheduleAlarm(context, alarm, true)
+                    repo.update(updatedAlarm)
+                    AlarmScheduler.scheduleAlarm(context, updatedAlarm, true)
                 }
             }
 

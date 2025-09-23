@@ -30,7 +30,7 @@ class AlarmTriggerViewModel(application: Application) : AndroidViewModel(applica
                 return@launch
             }
 
-            val alarm = withContext(Dispatchers.IO) { repo.getById(alarmId) }
+            val alarm = repo.getById(alarmId)
             if (alarm != null) {
                 _uiState.value = Resource.Success(alarm)
             } else {

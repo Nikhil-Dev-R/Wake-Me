@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Log.i("BootReceiver", "onReceive() called with: context = $context, intent = $intent")
         val action = intent.action ?: return
         if (action == Intent.ACTION_BOOT_COMPLETED || action == Intent.ACTION_MY_PACKAGE_REPLACED) {
             val appContext = context.applicationContext ?: return
@@ -19,11 +18,7 @@ class BootReceiver : BroadcastReceiver() {
             CoroutineScope(Dispatchers.IO).launch {
                 val repo = AlarmRepository(appContext)
                 val alarms = repo.getEnabledAlarmsList()
-                Log.i("BootReceiver", "Rescheduling ${alarms.size} alarms after reboot/update.")
                 alarms.forEach { alarm ->
-//                    val next = alarm.calculateNextTrigger().timeInMillis
-//                    val updated = alarm.copy(nextTriggerAt = next, upcomingShown = false)
-//                    repo.update(updated)
                     AlarmScheduler.scheduleAlarm(appContext, alarm)
                 }
             }

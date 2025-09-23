@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.nikhil.wakeme.AlarmTriggerActivity
 import com.nikhil.wakeme.R
@@ -22,7 +21,6 @@ object NotificationHelper {
     private const val FULL_SCREEN_REQUEST_CODE = 1001
 
     fun showUpcomingAlarmNotification(context: Context, alarm: Alarm) {
-        Log.d("NotificationHelper", "showUpcomingAlarmNotification: ${alarm.id}")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 UPCOMING_CHANNEL_ID, UPCOMING_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT
@@ -42,7 +40,6 @@ object NotificationHelper {
     }
 
     fun showAlarmNotification(context: Context, alarm: Alarm) {
-        Log.d("NotificationHelper", "showAlarmNotification: ${alarm.id}")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 FULLSCREEN_CHANNEL_ID, FULLSCREEN_CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH
