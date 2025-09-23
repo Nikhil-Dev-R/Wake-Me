@@ -71,29 +71,31 @@ class AlarmEditViewModel(
         viewModelScope.launch {
             _loadState.value = Resource.Loading()
             try {
-                val alarmAndState = withContext(Dispatchers.IO) {
-                    val alarm = repository.getById(alarmId)
-                    alarm?.let {
-                        val adjustedNextTime = it.calculateNextTrigger().timeInMillis
-                        val uiState = UiState(
-                            now = adjustedNextTime,
-                            hour = it.hour,
-                            minute = it.minute,
-                            label = it.label.orEmpty(),
-                            snoozeDuration = it.snoozeDuration,
-                            ringtoneUri = it.ringtoneUri,
-                            ringtoneTitle = it.ringtoneTitle ?: "Default Ringtone",
-                            daysOfWeek = it.daysOfWeek,
-                            vibration = it.vibration
-                        )
-                        Pair(alarm, uiState)
-                    }
+                val alarm = withContext(Dispatchers.IO) {
+                    repository.getById(alarmId)
                 }
-                // Switch to main thread only for UI state updates
-                alarmAndState?.let { (alarm, uiState) ->
+
+                if (alarm != null) {
+                    val uiState = UiState(
+                        now = alarm.nextTriggerAt,
+                        hour = alarm.hour,
+                        minute = alarm.minute,
+                        label = alarm.label.orEmpty(),
+                        snoozeDuration = alarm.snoozeDuration,
+                        ringtoneUri = alarm.ringtoneUri,
+                        ringtoneTitle = alarm.ringtoneTitle ?: "Default Ringtone",
+                        daysOfWeek = alarm.daysOfWeek,
+                        vibration = alarm.vibration
+                    )
                     _uiState.value = uiState
                     _loadState.value = Resource.Success(alarm)
-                } ?: run {
+
+                    // Defer the calculation of the next trigger time
+                    viewModelScope.launch(Dispatchers.IO) {
+                        val adjustedNextTime = alarm.calculateNextTrigger().timeInMillis
+                        _uiState.update { it.copy(now = adjustedNextTime) }
+                    }
+                } else {
                     _loadState.value = Resource.Success(null)
                 }
             } catch (e: Exception) {
